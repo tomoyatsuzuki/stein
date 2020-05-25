@@ -1,0 +1,40 @@
+name: release
+on:
+  push:
+    branches: [ deploy ]
+  # repository_dispatch:
+  #   type: [ build ]
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout from master branch
+        uses: actions/checkout@v1
+        with:
+          ref: 'master'
+      - name: Configuration on Ubuntu 18.04
+        uses: actions/setup-node@v1
+        with:
+          node-versoin: '10.x'
+      - name: Deploy configuration
+        run: |
+          mkdir ~/.ssh
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          echo "${{ secrets.ACTIONS_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+          chmod 400 ~/.ssh/id_rsa
+      - name: Build
+        run: |
+          yarn install
+          yarn generate
+      - name: Push to GitHub
+        env: 
+          GITHUB_USER: "tomoyatsuzuki"
+          GITHUB_EMAIL: "tomoyatsuzuki@gmail.com"
+        run: |
+          git config --local user.name "${GITHUB_USER}"
+          git config --local user.email "${GITHUB_EMAIL}"
+          git remote set-url origin git@github.com:tomoyatsuzuki/stein.git
+          git add -f docs
+          git commit -m "auto rebuilding site"
+          git push -f origin HEAD:master
+
