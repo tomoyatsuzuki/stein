@@ -1,9 +1,9 @@
 name: release
 on:
   push:
-    branches: [ deploy ]
-  # repository_dispatch:
-  #   type: [ build ]
+    branches: [ master ]
+  repository_dispatch:
+    type: [ build ]
 jobs:
   build:
     runs-on: ubuntu-18.04
@@ -27,7 +27,7 @@ jobs:
           yarn install
           yarn generate
       - name: Push to GitHub
-        env: 
+        env:
           GITHUB_USER: "tomoyatsuzuki"
           GITHUB_EMAIL: "tomoyatsuzuki@gmail.com"
         run: |
